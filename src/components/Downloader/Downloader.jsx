@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MdContentPaste, MdDownload } from "react-icons/md";
 
 const Downloader = () => {
-  const bypassURL = "https://pd.cybar.xyz";
+  const bypassURL = "https://pixeldrain.com/api/file";
   const [downloadLink, setDownloadLink] = useState("");
   const [url, setUrl] = useState("");
 
@@ -11,28 +11,35 @@ const Downloader = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSpeedBypass = () => {
-    setErrorMessage("");
-    setLinkMessage("");
-    setDownloadLink("");
-    setIsLoading(true);
+  setErrorMessage("");
+  setLinkMessage("");
+  setDownloadLink("");
+  setIsLoading(true);
 
-    const match = url.match(/^https:\/\/pixeldrain\.com\/u\/([a-zA-Z0-9]+)/);
+  // Support for all official PixelDrain domains & formats
+  const pixelDrainRegex =
+    /^https?:\/\/(www\.)?(pixeldrain\.com|pixeldra\.in)\/(u|l|file|api\/file)\/([a-zA-Z0-9]+)/;
 
-    if (match) {
-      const id = match[1];
-      setTimeout(() => {
-        setLinkMessage("Download Link Is Ready");
-        setDownloadLink(bypassURL + "/" + id);
-        setIsLoading(false);
-      }, 2000);
-    } else if (url === "") {
+  if (!url.trim()) {
+    setIsLoading(false);
+    return setErrorMessage("URL Is Empty");
+  }
+
+  const match = url.match(pixelDrainRegex);
+
+  if (match) {
+    const id = match[4]; // extracted ID
+
+    setTimeout(() => {
+      setLinkMessage("Download Link Is Ready");
+      setDownloadLink(`${bypassURL}/${id}?download`);
       setIsLoading(false);
-      setErrorMessage("URL Is Empty");
-    } else {
-      setIsLoading(false);
-      setErrorMessage("Please Paste A Valid URL");
-    }
-  };
+    }, 2000);
+  } else {
+    setIsLoading(false);
+    setErrorMessage("Please Paste A Valid PixelDrain URL");
+  }
+};
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
