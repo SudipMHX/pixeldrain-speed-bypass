@@ -1,4 +1,4 @@
-# <h1>[SpeedDrain](https://speeddrain.vercel.app/): Lightning-Fast Pixeldrain Downloads</h1>
+# <h1>[SpeedDrain](https://speed-drain.com): Lightning-Fast Pixeldrain Downloads</h1>
 
 ## 🚀 What is SpeedDrain?
 
@@ -15,17 +15,17 @@ SpeedDrain is a powerful and easy-to-use tool designed to bypass Pixeldrain's sl
 
 If you're tired of slow Pixeldrain downloads, SpeedDrain is the perfect solution. It enhances your downloading experience by offering a seamless, high-speed alternative to Pixeldrain’s limitations.
 
-[<img width="400" src="./public/readme.png" alt="SpeedDrain - Fast Pixeldrain Downloader">](https://speeddrain.vercel.app/)
+[<img width="400" src="./public/readme.png" alt="SpeedDrain - Fast Pixeldrain Downloader">](https://speed-drain.com)
 
 ## 📌 How to Use SpeedDrain?
-1. **Visit [SpeedDrain](https://speeddrain.vercel.app/).**
+1. **Visit [SpeedDrain](https://speed-drain.com).**
 2. **Paste the Pixeldrain file link** you want to download.
 3. **Click on the download button.**
 4. **Enjoy faster downloads** without any restrictions!
 
 ## 🔗 Try SpeedDrain Now
 
-[✨ Get Started with SpeedDrain](https://speeddrain.vercel.app/)
+[✨ Get Started with SpeedDrain](https://speed-drain.com)
 
 ---
 
