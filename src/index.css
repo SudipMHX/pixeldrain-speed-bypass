@@ -1,18 +1,177 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: wireframe --default, black --prefersdark;
+  themes: black --default;
 }
 
-.background {
-  background-repeat: repeat;
-  animation: bgAnima 30s linear infinite;
+/* ── Design tokens ── */
+:root {
+  --accent: #6c63ff;
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes bgAnima {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
+/* ── Base ── */
+html, body, #root { height: 100%; }
+body { font-family: "Inter", sans-serif; cursor: none; -webkit-font-smoothing: antialiased; }
+*, *::before, *::after { box-sizing: border-box; }
+a, button, [role="button"], input, textarea, select { cursor: none; }
+
+/* ══════════════════════════════════════════════════
+   BACKGROUND — color-shifting blobs (no rotation)
+══════════════════════════════════════════════════ */
+.background { background-color: #06060f; }
+
+.background::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, #0e0c2a 0%, #06060f 100%);
+  pointer-events: none;
+  z-index: -3;
+}
+
+.background::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 20%, rgba(108,63,255,0.28) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 45% at 82% 12%, rgba(255,63,120,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 40% at 60% 85%, rgba(43,210,120,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 8%  78%, rgba(43,140,255,0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 35% at 90% 60%, rgba(255,160,43,0.14) 0%, transparent 55%);
+  animation: colorShift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: -2;
+  filter: blur(70px);
+}
+
+@keyframes colorShift {
+  0%   { filter: blur(70px) hue-rotate(0deg);   opacity: 1;    transform: translateY(0px)   scale(1);    }
+  25%  { filter: blur(80px) hue-rotate(40deg);  opacity: 0.9;  transform: translateY(-12px) scale(1.03); }
+  50%  { filter: blur(75px) hue-rotate(90deg);  opacity: 0.95; transform: translateY(8px)   scale(0.98); }
+  75%  { filter: blur(85px) hue-rotate(150deg); opacity: 0.85; transform: translateY(-6px)  scale(1.02); }
+  100% { filter: blur(70px) hue-rotate(200deg); opacity: 1;    transform: translateY(4px)   scale(1);    }
+}
+
+/* ── Dot grid overlay ── */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(120,100,255,0.12) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: gridBreathe 8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+@keyframes gridBreathe {
+  from { opacity: 0.45; }
+  to   { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════
+   HERO SECTION GLOW  (pseudo-elements need CSS)
+══════════════════════════════════════════════════ */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+.hero-section > * { position: relative; z-index: 1; }
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, 130vw);
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 30%, rgba(108,63,255,0.30) 0%, rgba(255,63,120,0.16) 35%, transparent 70%);
+  animation: heroGlow 16s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(40px);
+}
+
+@keyframes heroGlow {
+  0%   { filter: blur(40px) hue-rotate(0deg);   opacity: 1;    transform: translateX(-50%) scale(1);    }
+  40%  { filter: blur(50px) hue-rotate(60deg);  opacity: 0.85; transform: translateX(-50%) scale(1.06); }
+  70%  { filter: blur(45px) hue-rotate(130deg); opacity: 0.92; transform: translateX(-50%) scale(0.96); }
+  100% { filter: blur(40px) hue-rotate(200deg); opacity: 1;    transform: translateX(-50%) scale(1.03); }
+}
+
+
+/* ══════════════════════════════════════════════════
+   GRADIENT TEXT  (animation can't be done in Tailwind)
+══════════════════════════════════════════════════ */
+.gradient-text {
+  background: linear-gradient(135deg, #6c63ff 0%, #ff6584 55%, #43e97b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textHue 18s ease-in-out infinite alternate;
+  display: inline-block;
+}
+@keyframes textHue {
+  0%   { filter: hue-rotate(0deg);   }
+  50%  { filter: hue-rotate(100deg); }
+  100% { filter: hue-rotate(200deg); }
+}
+
+/* ══════════════════════════════════════════════════
+   MOUSE CURSOR EFFECT  (must be position:fixed)
+══════════════════════════════════════════════════ */
+.trail-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+}
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  pointer-events: none;
+  z-index: 10001;
+  will-change: transform;
+  transition: transform 0.08s ease;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(108,99,255,0.65);
+  pointer-events: none;
+  z-index: 10000;
+  will-change: transform;
+  transition: transform 0.12s cubic-bezier(0.25,0.46,0.45,0.94), width 0.2s ease, height 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.cursor-ring.hovered  { width: 52px; height: 52px; border-color: rgba(255,101,132,0.8); background: rgba(255,101,132,0.06); margin-top: -6px; margin-left: -6px; }
+.cursor-ring.clicked  { width: 28px; height: 28px; background: rgba(108,99,255,0.18);   border-color: rgba(108,99,255,0.9);  margin-top: 6px;  margin-left: 6px;  }
+
+/* ── Spinner (used inside generate button) ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+/* ── CDN bar copy state (dynamic class toggle) ── */
+.cdn-copied {
+  background: rgba(67,233,123,0.18) !important;
+  border-color: #43e97b !important;
 }

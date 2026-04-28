@@ -1,120 +1,112 @@
 import { useEffect, useRef, useState } from "react";
-import "./MouseEffect.css"; // Import your CSS
+import "./MouseEffect.css";
+
+const TRAIL_LENGTH = 18;
 
 const MouseEffect = () => {
-  const [coords, setCoords] = useState({ x: 0, y: 0 });
-  const [isClicked, setIsClicked] = useState(false); // Track click state
-  const [isHovering, setIsHovering] = useState(false); // Track hover state
+  const [pos, setPos] = useState({ x: -200, y: -200 });
+  const [isClicked, setIsClicked] = useState(false);
+  const [isPointer, setIsPointer] = useState(false);
 
-  const colors = [
-    "#ffb56b",
-    "#fdaf69",
-    "#f89d63",
-    "#f59761",
-    "#ef865e",
-    "#ec805d",
-    "#e36e5c",
-    "#df685c",
-    "#d5585c",
-    "#d1525c",
-    "#c5415d",
-    "#c03b5d",
-    "#b22c5e",
-    "#ac265e",
-    "#9c155f",
-    "#950f5f",
-    "#830060",
-    "#7c0060",
-    "#680060",
-    "#60005f",
-    "#48005f",
-    "#3d005e",
-  ];
+  const trailRef = useRef([]);
+  const frameRef = useRef(null);
+  const mouseRef = useRef({ x: -200, y: -200 });
 
-  const circlesRef = useRef([]);
-  const animationFrameRef = useRef(null);
-
-  // Initialize circles on component mount
+  // Sync mouse position
   useEffect(() => {
-    const circleElements = Array.from(document.querySelectorAll(".circle"));
-    circlesRef.current = circleElements;
+    const onMove = (e) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+      setPos({ x: e.clientX, y: e.clientY });
 
-    circleElements.forEach((circle, index) => {
-      circle.x = 0;
-      circle.y = 0;
-      circle.style.backgroundColor = colors[index % colors.length];
-    });
-
-    const handleMouseMove = (e) => {
-      setCoords({ x: e.clientX, y: e.clientY });
-      // Check if the cursor is over an element with pointer cursor
-      const element = document.elementFromPoint(e.clientX, e.clientY);
-      if (element) {
-        const style = getComputedStyle(element);
-        setIsHovering(style.cursor === "pointer");
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el) {
+        setIsPointer(getComputedStyle(el).cursor === "pointer");
       }
     };
+    const onDown = (e) => e.button === 0 && setIsClicked(true);
+    const onUp   = (e) => e.button === 0 && setIsClicked(false);
 
-    const handleMouseDown = (e) => {
-      if (e.button === 0) {
-        // Left mouse button
-        setIsClicked(true);
-      }
-    };
-
-    const handleMouseUp = (e) => {
-      if (e.button === 0) {
-        // Left mouse button
-        setIsClicked(false);
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("mouseup", handleMouseUp);
-
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup",   onUp);
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("mouseup", handleMouseUp);
-      cancelAnimationFrame(animationFrameRef.current);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup",   onUp);
     };
   }, []);
 
-  // Animate circles
+  // Animate trail dots
   useEffect(() => {
-    const animateCircles = () => {
-      let x = coords.x;
-      let y = coords.y;
+    const dots = trailRef.current;
+    if (!dots.length) return;
 
-      circlesRef.current.forEach((circle, index) => {
-        // Update position using transform
-        const scale = isClicked || isHovering ? 1.5 : 1; // Scale up when clicked or hovering
-        circle.style.transform = `translate(${x - 12}px, ${y - 12}px) scale(${
-          ((circlesRef.current.length - index) / circlesRef.current.length) *
-          scale
-        })`;
+    // init positions
+    dots.forEach((d) => { if (d) { d._x = mouseRef.current.x; d._y = mouseRef.current.y; } });
 
-        circle.x = x;
-        circle.y = y;
+    const animate = () => {
+      let x = mouseRef.current.x;
+      let y = mouseRef.current.y;
 
-        const nextCircle =
-          circlesRef.current[index + 1] || circlesRef.current[0];
-        x += (nextCircle.x - x) * 0.3;
-        y += (nextCircle.y - y) * 0.3;
+      dots.forEach((dot, i) => {
+        if (!dot) return;
+        const ratio = (TRAIL_LENGTH - i) / TRAIL_LENGTH;
+        const scale = isClicked ? ratio * 1.6 : isPointer ? ratio * 1.35 : ratio;
+
+        dot.style.transform = `translate(${x - 6}px, ${y - 6}px) scale(${scale})`;
+        dot.style.opacity = String(ratio * 0.7);
+
+        dot._x = x;
+        dot._y = y;
+
+        const next = dots[i + 1] || dots[0];
+        if (next) {
+          x += (next._x - x) * 0.28;
+          y += (next._y - y) * 0.28;
+        }
       });
 
-      animationFrameRef.current = requestAnimationFrame(animateCircles);
+      frameRef.current = requestAnimationFrame(animate);
     };
 
-    animationFrameRef.current = requestAnimationFrame(animateCircles);
-    return () => cancelAnimationFrame(animationFrameRef.current);
-  }, [coords, isClicked, isHovering]); // Add isHovering to dependencies
+    frameRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [isClicked, isPointer]);
+
+  // Accent color gradient across trail
+  const trailColors = [
+    "#a78bff","#9d7cff","#9370ff","#8860ff","#7d50f0",
+    "#7242e0","#6c63ff","#6057f0","#5548d8","#4a3ac0",
+    "#42d9ff","#36c8f0","#2ab8e0","#1fa8d0","#6c63ff",
+    "#ff6584","#e85f78","#c95a6a",
+  ];
 
   return (
     <>
-      {Array.from({ length: 20 }, (_, index) => (
-        <div key={index} className='circle'></div>
+      {/* Leading cursor dot */}
+      <div
+        className="cursor-dot"
+        style={{
+          transform: `translate(${pos.x - 5}px, ${pos.y - 5}px) scale(${isClicked ? 0.5 : 1})`,
+        }}
+      />
+
+      {/* Cursor ring */}
+      <div
+        className={`cursor-ring ${isPointer ? "hovered" : ""} ${isClicked ? "clicked" : ""}`}
+        style={{
+          transform: `translate(${pos.x - 20}px, ${pos.y - 20}px)`,
+        }}
+      />
+
+      {/* Trail dots */}
+      {Array.from({ length: TRAIL_LENGTH }, (_, i) => (
+        <div
+          key={i}
+          ref={(el) => { trailRef.current[i] = el; }}
+          className="trail-dot"
+          style={{ backgroundColor: trailColors[i % trailColors.length] }}
+        />
       ))}
     </>
   );
